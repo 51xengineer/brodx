@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  id          String        @id @default(uuid())
+  title       String
+  description String
+  icon        String
+  createdAt   DateTime      @default(now())
+  orders      Order[]
+  pricing     PricingTier[]
+}
+
+model PricingTier {
+  id        String  @id @default(uuid())
+  serviceId String
+  name      String
+  price     Float
+  features  Json
+  orders    Order[]
+  service   Service @relation(fields: [serviceId], references: [id])
+}
+
+model Order {
+  id                String       @id @default(uuid())
+  clientName        String
+  email             String
+  phone             String?
+  serviceId         String?
+  tierId            String?
+  amount            Float
+  razorpayOrderId   String?      @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
+  status            String       @default("created")
+  requirements      String?
+  createdAt         DateTime     @default(now())
+  notes             String?
+  paymentLinkId     String?      @unique
+  paymentLinkUrl    String?
+  service           Service?     @relation(fields: [serviceId], references: [id])
+  tier              PricingTier? @relation(fields: [tierId], references: [id])
+}

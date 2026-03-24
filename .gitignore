@@ -1,0 +1,39 @@
+# Dependency directories
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build artifacts
+dist/
+client/dist/
+server/dist/
+dist-ssr/
+build/
+
+# Environment variables (Sensitive)
+.env
+.env.local
+.env.*.local
+client/.env
+server/.env
+
+# Prisma
+/server/prisma/generated-client
+/server/prisma/dev.db
+/server/prisma/dev.db-journal
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
