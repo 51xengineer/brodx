@@ -15,10 +15,10 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
             
             {/* Global Background Decoration: Premium Cross Lines */}
             <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-                <svg className={`absolute top-0 left-0 w-full h-full transition-opacity duration-500 ${isDark ? 'opacity-[0.02]' : 'opacity-[0.04]'}`} xmlns="http://www.w3.org/2000/svg">
+                <svg className={`absolute top-0 left-0 w-full h-full opacity-[0.03]`} xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <pattern id="grid" width="100" height="100" patternUnits="userSpaceOnUse">
-                            <path d="M 100 0 L 0 0 0 100" fill="none" stroke={isDark ? "white" : "black"} strokeWidth="0.5"/>
+                            <path d="M 100 0 L 0 0 0 100" fill="none" stroke={isDark ? "white" : "black"} strokeWidth="1"/>
                         </pattern>
                     </defs>
                     <rect width="100%" height="100%" fill="url(#grid)" />

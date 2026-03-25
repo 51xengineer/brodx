@@ -215,7 +215,7 @@ const PaymentSuccess: React.FC = () => {
                 </div>
             </div>
 
-            <div className="container mx-auto px-6 py-20 max-w-3xl space-y-12">
+            <div className="container mx-auto px-4 md:px-6 py-12 md:py-20 max-w-3xl space-y-10 md:space-y-12">
                 {/* Success Hero */}
                 <div className="text-center space-y-6">
                     <div className="relative inline-flex">
@@ -229,7 +229,7 @@ const PaymentSuccess: React.FC = () => {
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-xs font-black uppercase tracking-widest">
                             Payment Confirmed
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight">
+                        <h1 className="text-3xl md:text-6xl font-black tracking-tighter leading-tight">
                             You're all <span className="text-primary italic serif">set</span>!
                         </h1>
                         <p className="text-muted text-lg max-w-xl mx-auto leading-relaxed">
@@ -241,13 +241,13 @@ const PaymentSuccess: React.FC = () => {
                 {/* Order Card */}
                 <div className="bg-card border border-border/50 rounded-[2rem] overflow-hidden shadow-2xl shadow-primary/5">
                     {/* Card Header */}
-                    <div className="bg-primary/5 border-b border-border/40 px-10 py-8 flex items-center justify-between">
+                    <div className="bg-primary/5 border-b border-border/40 px-6 py-6 md:px-10 md:py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 sm:gap-2">
                         <div>
-                            <div className="text-xs font-black text-muted uppercase tracking-widest mb-1">Invoice Number</div>
-                            <div className="font-mono font-black text-xl tracking-tight">{invoiceNo}</div>
+                            <div className="text-[10px] font-black text-muted uppercase tracking-widest mb-1">Invoice Number</div>
+                            <div className="font-mono font-black text-lg md:text-xl tracking-tight">{invoiceNo}</div>
                         </div>
-                        <div className="flex flex-col items-end gap-2">
-                            <Badge className={`px-4 py-2 rounded-full text-xs font-black uppercase tracking-widest ${isPaid ? 'bg-accent/10 text-accent border-accent/20' : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'}`}>
+                        <div className="flex flex-col items-start sm:items-end gap-2">
+                            <Badge className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest ${isPaid ? 'bg-accent/10 text-accent border-accent/20' : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'}`}>
                                 {isPaid ? '✓ Paid' : order.status}
                             </Badge>
                             <div className="flex items-center gap-1.5 opacity-40 grayscale group-hover:grayscale-0 transition-all">
@@ -258,53 +258,53 @@ const PaymentSuccess: React.FC = () => {
                     </div>
 
                     {/* Details Grid */}
-                    <div className="px-10 py-8 grid grid-cols-2 gap-8">
+                    <div className="px-6 py-6 md:px-10 md:py-8 grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                         <div className="space-y-1">
-                            <div className="text-xs font-black text-muted uppercase tracking-widest">Client</div>
-                            <div className="font-black text-lg">{order.clientName}</div>
-                            <div className="text-sm text-muted">{order.email}</div>
+                            <div className="text-[10px] font-black text-muted uppercase tracking-widest">Client</div>
+                            <div className="font-black text-base md:text-lg">{order.clientName}</div>
+                            <div className="text-xs md:text-sm text-muted">{order.email}</div>
                         </div>
                         <div className="space-y-1">
-                            <div className="text-xs font-black text-muted uppercase tracking-widest">Date</div>
-                            <div className="font-bold">{transactionDate}</div>
+                            <div className="text-[10px] font-black text-muted uppercase tracking-widest">Date</div>
+                            <div className="font-bold text-sm md:text-base">{transactionDate}</div>
                         </div>
                         <div className="space-y-1">
-                            <div className="text-xs font-black text-muted uppercase tracking-widest">Service</div>
-                            <div className="font-black">{order.service?.title || order.notes?.substring(0, 40) || 'Custom Request'}</div>
-                            {order.tier && <div className="text-sm text-muted">{order.tier.name} Package</div>}
+                            <div className="text-[10px] font-black text-muted uppercase tracking-widest">Service</div>
+                            <div className="font-black text-sm md:text-base">{order.service?.title || order.notes?.substring(0, 40) || 'Custom Request'}</div>
+                            {order.tier && <div className="text-xs md:text-sm text-muted">{order.tier.name} Package</div>}
                         </div>
                         <div className="space-y-1">
-                            <div className="text-xs font-black text-muted uppercase tracking-widest">Amount Paid</div>
-                            <div className="font-mono font-black text-3xl tracking-tighter text-accent">₹{order.amount.toLocaleString('en-IN')}</div>
+                            <div className="text-[10px] font-black text-muted uppercase tracking-widest">Amount Paid</div>
+                            <div className="font-mono font-black text-2xl md:text-3xl tracking-tighter text-accent">₹{order.amount.toLocaleString('en-IN')}</div>
                         </div>
                         {order.razorpayPaymentId && (
-                            <div className="col-span-2 space-y-1 pt-4 border-t border-border/40">
-                                <div className="text-xs font-black text-muted uppercase tracking-widest">Payment Reference</div>
-                                <div className="font-mono text-sm text-muted bg-background/50 px-4 py-2 rounded-xl border border-border/40 break-all">{order.razorpayPaymentId}</div>
+                            <div className="col-span-1 sm:col-span-2 space-y-1 pt-4 border-t border-border/40">
+                                <div className="text-[10px] font-black text-muted uppercase tracking-widest">Payment Reference</div>
+                                <div className="font-mono text-[10px] md:text-sm text-muted bg-background/50 px-4 py-2 rounded-xl border border-border/40 break-all">{order.razorpayPaymentId}</div>
                             </div>
                         )}
                         {order.requirements && (
-                            <div className="col-span-2 space-y-1">
-                                <div className="text-xs font-black text-muted uppercase tracking-widest">Session Notes</div>
-                                <div className="text-sm text-muted bg-background/50 px-4 py-3 rounded-xl border border-border/40">{order.requirements}</div>
+                            <div className="col-span-1 sm:col-span-2 space-y-1">
+                                <div className="text-[10px] font-black text-muted uppercase tracking-widest">Session Notes</div>
+                                <div className="text-xs md:text-sm text-muted bg-background/50 px-4 py-3 rounded-xl border border-border/40">{order.requirements}</div>
                             </div>
                         )}
                     </div>
 
                     {/* Actions */}
-                    <div className="px-10 pb-10 flex flex-col sm:flex-row gap-4">
+                    <div className="px-6 pb-6 md:px-10 md:pb-10 flex flex-col sm:flex-row gap-4">
                         <Button
                             size="lg"
-                            className="flex-1 h-14 rounded-2xl font-bold gap-2 shadow-xl shadow-primary/10"
+                            className="flex-1 h-12 md:h-14 rounded-2xl font-bold gap-2 shadow-xl shadow-primary/10 text-xs md:text-sm"
                             onClick={handleDownloadInvoice}
                         >
                             <Download size={18} />
-                            Download Invoice (PDF)
+                            Download Invoice
                         </Button>
                         <Button
                             size="lg"
                             variant="outline"
-                            className="flex-1 h-14 rounded-2xl font-bold gap-2"
+                            className="flex-1 h-12 md:h-14 rounded-2xl font-bold gap-2 text-xs md:text-sm"
                             onClick={() => navigate('/services')}
                         >
                             Book Another Session
@@ -313,7 +313,7 @@ const PaymentSuccess: React.FC = () => {
                 </div>
 
                 {/* What's Next */}
-                <div className="bg-card/30 border border-border/40 rounded-[2rem] p-10 space-y-6">
+                <div className="bg-card/30 border border-border/40 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-10 space-y-6 md:space-y-8">
                     <div className="text-xs font-black text-muted uppercase tracking-widest">What Happens Next</div>
                     <div className="space-y-4">
                         {[
