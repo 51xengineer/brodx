@@ -32,7 +32,18 @@ const PaymentSuccess: React.FC = () => {
     const [order, setOrder] = useState<Order | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
-
+ 
+    const formatDate = (dateStr?: string, options?: Intl.DateTimeFormatOptions) => {
+        if (!dateStr) return 'Pending...'
+        try {
+            const d = new Date(dateStr)
+            if (isNaN(d.getTime())) return 'Invalid Date'
+            return d.toLocaleDateString('en-IN', options)
+        } catch (e) {
+            return 'Invalid Date'
+        }
+    }
+ 
     useEffect(() => {
         if (!orderId) {
             setError('No order ID provided.')
@@ -49,11 +60,11 @@ const PaymentSuccess: React.FC = () => {
         if (!order) return
         const invoiceWindow = window.open('', '_blank')
         if (!invoiceWindow) return
-
-        const date = new Date(order.createdAt).toLocaleDateString('en-IN', {
+ 
+        const date = formatDate(order.createdAt, {
             day: '2-digit', month: 'long', year: 'numeric'
         })
-        const invoiceNo = `INV-${order.id.substring(0, 8).toUpperCase()}`
+        const invoiceNo = `INV-${(order.id || 'xxxxxxx').substring(0, 8).toUpperCase()}`
         const serviceName = order.service?.title || order.notes?.substring(0, 40) || 'Custom Service'
         const tierName = order.tier?.name || 'Standard'
 
@@ -175,10 +186,11 @@ const PaymentSuccess: React.FC = () => {
     )
 
     const isPaid = order.status === 'paid' || status === 'success'
-    const transactionDate = new Date(order.createdAt).toLocaleDateString('en-IN', {
+ 
+    const transactionDate = formatDate(order.createdAt, {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
     })
-    const invoiceNo = `INV-${order.id.substring(0, 8).toUpperCase()}`
+    const invoiceNo = `INV-${(order.id || 'xxxxxxx').substring(0, 8).toUpperCase()}`
 
     return (
         <div className="min-h-screen bg-background text-foreground">
