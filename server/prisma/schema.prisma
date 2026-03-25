@@ -12,6 +12,7 @@ model Service {
   title       String
   description String
   icon        String
+  features    Json?
   createdAt   DateTime      @default(now())
   orders      Order[]
   pricing     PricingTier[]

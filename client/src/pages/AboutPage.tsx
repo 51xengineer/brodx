@@ -14,7 +14,7 @@ const AboutPage: React.FC = () => {
         {
             title: "WORK",
             icon: <Rocket className="text-primary" size={24} />,
-            items: ["Web applications", "AI solutions", "Mentorship (CS, DSA)", "Career guidance"]
+            items: ["Web applications", "AI solutions", "Structural Mentorship", "Career guidance"]
         },
         {
             title: "APPROACH",

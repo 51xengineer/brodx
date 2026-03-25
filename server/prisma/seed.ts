@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient, Prisma } from '@prisma/client'
 import process from 'node:process'
 const prisma = new PrismaClient()
+// Triggering re-scan of types after prisma generate
 
 async function main() {
     // Clear existing data
@@ -13,6 +14,7 @@ async function main() {
             title: 'Elite Web Synthesis',
             description: 'Blazing fast, high-performance web applications built for extreme scale and surgical precision.',
             icon: 'Rocket',
+            features: ['100k+ Scale', 'Type-Safe', 'Cloud Ready'],
             pricing: {
                 create: [
                     { name: 'Basic', price: 99, features: ['Core Deliverables', 'Email Support'] },
@@ -20,7 +22,7 @@ async function main() {
                     { name: 'Premium', price: 499, features: ['Full Suite Solutions', '24/7 Support'] },
                 ]
             }
-        }
+        } as any
     })
 
     const ai = await prisma.service.create({
@@ -28,6 +30,7 @@ async function main() {
             title: 'Neural Architecture',
             description: 'Integrating advanced LLMs and specialized ML models into your ecosystem.',
             icon: 'Brain',
+            features: ['LLM Ops', 'Agentic Flow', 'Vectorized'],
             pricing: {
                 create: [
                     { name: 'Basic', price: 149, features: ['Core Deliverables', 'Email Support'] },
@@ -35,7 +38,7 @@ async function main() {
                     { name: 'Premium', price: 599, features: ['Full Suite Solutions', '24/7 Support'] },
                 ]
             }
-        }
+        } as any
     })
 
     const mentorship = await prisma.service.create({
@@ -43,6 +46,7 @@ async function main() {
             title: 'Structural Mentorship',
             description: 'Deep-dive session to re-architect your engineering path.',
             icon: 'GraduationCap',
+            features: ['1:1 Sessions', 'Mock Debits', 'Roadmaps'],
             pricing: {
                 create: [
                     { name: 'Basic', price: 49, features: ['Core Deliverables', 'Email Support'] },
@@ -50,7 +54,7 @@ async function main() {
                     { name: 'Premium', price: 199, features: ['Full Suite Solutions', '24/7 Support'] },
                 ]
             }
-        }
+        } as any
     })
 
     const career = await prisma.service.create({
@@ -58,6 +62,7 @@ async function main() {
             title: 'Placement Strategy',
             description: 'Personal consultancy to navigate the global tech market.',
             icon: 'Users',
+            features: ['Global Network', 'Resume Sync', 'Negotiation'],
             pricing: {
                 create: [
                     { name: 'Basic', price: 29, features: ['Core Deliverables', 'Email Support'] },
@@ -65,7 +70,7 @@ async function main() {
                     { name: 'Premium', price: 129, features: ['Full Suite Solutions', '24/7 Support'] },
                 ]
             }
-        }
+        } as any
     })
 
     const debug = await prisma.service.create({

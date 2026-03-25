@@ -456,4 +456,14 @@ const openApiSpec = {
 app.get('/docs/spec', (c) => c.json(openApiSpec))
 app.get('/docs', swaggerUI({ url: '/docs/spec' }))
 
+import { serve } from '@hono/node-server'
+
+const port = 3000
+console.log(`Server is running on port ${port}`)
+
+serve({
+  fetch: app.fetch,
+  port
+})
+
 export default app

@@ -33,7 +33,7 @@ export const ASSET_MAP: Record<string, { icon: React.ReactNode, image: string, b
         image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800',
         category: 'INTELLIGENCE'
     },
-    '1:1 Mentorship': {
+    'Structural Mentorship': {
         icon: <GraduationCap />,
         image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800',
         badge: 'HIGH VALUE',

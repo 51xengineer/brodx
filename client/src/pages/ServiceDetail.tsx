@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ArrowLeft, Check, ShieldCheck, Zap, Code, Terminal, Globe } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
@@ -22,17 +22,32 @@ interface ServiceDetailProps {
 const ServiceDetail: React.FC<ServiceDetailProps> = ({ service: propService, onBack }) => {
     const { id } = useParams()
     const navigate = useNavigate()
-    const service = propService || SERVICES.find(s => s.id === id)
     const { } = useTheme()
-    const [isBooking, setIsBooking] = useState(false)
     const [selectedTier, setSelectedTier] = useState<any>(null)
+    const [service, setService] = useState<any>(propService)
+    const [loading, setLoading] = useState(!propService)
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', requirements: '' })
-    const [loading, setLoading] = useState(false)
+    const [isBooking, setIsBooking] = useState(false)
     const [step, setStep] = useState(1)
     const [selectedDate, setSelectedDate] = useState('2026-03-25')
     const [selectedTime, setSelectedTime] = useState('14:00')
 
-    if (!service) return null
+    if (loading) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-background">
+                <div className="w-12 h-12 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+            </div>
+        )
+    }
+
+    if (!service) {
+        return (
+            <div className="container mx-auto px-6 py-32 min-h-screen text-center">
+                <h1 className="text-2xl font-black mb-4">Service Not Found</h1>
+                <Button onClick={onBack}>Back to Services</Button>
+            </div>
+        )
+    }
 
     const tiers = (service.pricing && service.pricing.length > 0) ? service.pricing : [
         { id: null, name: 'Basic', price: service.startingPrice || 9999, features: ['Core Deliverables', 'Email Support', '1 Revision', '3 Days Delivery'] },
@@ -40,11 +55,33 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ service: propService, onB
         { id: null, name: 'Premium', price: Math.round((service.startingPrice || 9999) * 3.5), features: ['Full Suite Solutions', '24/7 Support', 'Unlimited Revisions', '14 Days Delivery', 'Post-launch Support', 'Consultation Call'] },
     ]
 
-    React.useEffect(() => {
-        if (tiers && tiers.length > 0 && !selectedTier) {
-            setSelectedTier(tiers[0])
+    useEffect(() => {
+        if (!propService && id) {
+            setLoading(true)
+            axios.get(`${API_BASE_URL}/services`)
+                .then(r => {
+                    const found = r.data.find((s: any) => s.id === id)
+                    if (found) {
+                        setService(found)
+                    } else {
+                        // Fallback to static services if not in DB
+                        const staticFound = SERVICES.find(s => s.id === id)
+                        setService(staticFound || null)
+                    }
+                })
+                .catch(() => {
+                    const staticFound = SERVICES.find(s => s.id === id)
+                    setService(staticFound || null)
+                })
+                .finally(() => setLoading(false))
         }
-    }, [tiers, selectedTier])
+    }, [id, propService])
+
+    useEffect(() => {
+        if (service && service.pricing && service.pricing.length > 0 && !selectedTier) {
+            setSelectedTier(service.pricing[0])
+        }
+    }, [service, selectedTier])
 
     const handleBooking = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -156,55 +193,55 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ service: propService, onB
                         ))}
                     </div>
 
-                    {/* Features Section */}
-                    <div className="space-y-10">
-                        <h3 className="text-3xl font-black tracking-tight">Core Deliverables</h3>
-                        <div className="grid sm:grid-cols-2 gap-5">
-                            {service.features.map((f: string, i: number) => (
-                                <div key={i} className="flex items-center gap-4 p-5 bg-muted/40 border border-border rounded-2xl shadow-sm transition-colors hover:bg-muted/60">
-                                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                                        <Check size={14} strokeWidth={3} />
-                                    </div>
-                                    <span className="text-sm font-bold opacity-80 italic">{f}</span>
-                                </div>
-                            ))}
-                        </div>
+    {/* Features Section */}
+    <div className="space-y-10">
+        <h3 className="text-3xl font-black tracking-tight">Core Deliverables</h3>
+        <div className="grid sm:grid-cols-2 gap-5">
+            {(service.features || []).map((f: string, i: number) => (
+                <div key={i} className="flex items-center gap-4 p-5 bg-muted/40 border border-border rounded-2xl shadow-sm transition-colors hover:bg-muted/60">
+                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        <Check size={14} strokeWidth={3} />
                     </div>
+                    <span className="text-sm font-bold opacity-80 italic">{f}</span>
                 </div>
+            ))}
+        </div>
+    </div>
+</div>
 
-                {/* Sidebar Sticky Panel */}
-                <div className="relative">
-                    <div className="sticky top-32 space-y-8">
-                        {/* Tier Selector */}
-                        <div className="p-1.5 bg-muted/50 border border-border rounded-2xl flex gap-1.5 shadow-sm">
-                            {tiers.map((t: any) => (
-                                <button
-                                    key={t.name}
-                                    onClick={() => setSelectedTier(t)}
-                                    className={`flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${selectedTier?.name === t.name
-                                        ? 'bg-primary text-white shadow-xl shadow-primary/25'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-muted transition-colors'
-                                        }`}
-                                >
-                                    {t.name}
-                                </button>
-                            ))}
-                        </div>
+{/* Sidebar Sticky Panel */}
+<div className="relative">
+    <div className="sticky top-32 space-y-8">
+        {/* Tier Selector */}
+        <div className="p-1.5 bg-muted/50 border border-border rounded-2xl flex gap-1.5 shadow-sm">
+            {tiers.map((t: any) => (
+                <button
+                    key={t.name}
+                    onClick={() => setSelectedTier(t)}
+                    className={`flex-1 py-3.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${selectedTier?.name === t.name
+                        ? 'bg-primary text-white shadow-xl shadow-primary/25'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted transition-colors'
+                        }`}
+                >
+                    {t.name}
+                </button>
+            ))}
+        </div>
 
-                        {selectedTier && (
-                            <Card className="bg-card border-border shadow-premium rounded-[2.5rem] overflow-hidden border transition-all">
-                                <CardHeader className="p-10 pb-6 border-b border-border/50 bg-muted/20">
-                                    <div className="flex justify-between items-center mb-6">
-                                        <Badge className="bg-primary text-white border-none text-[9px] font-black uppercase tracking-widest px-3 py-1.5">
-                                            {selectedTier.name} SYNTHESIS
-                                        </Badge>
-                                        <ShieldCheck className="text-primary opacity-60" size={24} />
-                                    </div>
-                                    <div className="flex items-baseline gap-2">
-                                        <span className="text-5xl font-black tracking-tighter">₹{selectedTier.price.toLocaleString('en-IN')}</span>
-                                        <span className="text-muted-foreground text-xs font-black uppercase tracking-widest">/ session</span>
-                                    </div>
-                                </CardHeader>
+        {selectedTier ? (
+            <Card className="bg-card border-border shadow-premium rounded-[2.5rem] overflow-hidden border transition-all">
+                <CardHeader className="p-10 pb-6 border-b border-border/50 bg-muted/20">
+                    <div className="flex justify-between items-center mb-6">
+                        <Badge className="bg-primary text-white border-none text-[9px] font-black uppercase tracking-widest px-3 py-1.5">
+                            {selectedTier.name} SYNTHESIS
+                        </Badge>
+                        <ShieldCheck className="text-primary opacity-60" size={24} />
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-5xl font-black tracking-tighter">₹{selectedTier.price?.toLocaleString('en-IN') || '0'}</span>
+                        <span className="text-muted-foreground text-xs font-black uppercase tracking-widest">/ session</span>
+                    </div>
+                </CardHeader>
                                 <CardContent className="p-10 space-y-5">
                                     <div className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-4">Functional Suite</div>
                                     {selectedTier.features.map((f: string, i: number) => (
@@ -344,7 +381,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ service: propService, onB
                                     </Dialog>
                                 </CardFooter>
                             </Card>
-                        )}
+                        ) : null}
 
                         {/* Security Badge */}
                         <div className="p-8 bg-muted/40 border border-border rounded-[2rem] flex items-center gap-5 transition-all hover:bg-muted/60 shadow-sm border border-border">

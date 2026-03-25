@@ -186,7 +186,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onExplore }) => {
                             {[
                                 { icon: <Rocket size={20} />, title: 'Web2 Dev', desc: 'High-performance React & Node foundations.' },
                                 { icon: <Cpu size={20} />, title: 'AI Solutions', desc: 'LLM & Agentic flow integration.', brand: <GoogleMeetIcon size={14} /> },
-                                { icon: <GraduationCap size={20} />, title: '1:1 Mentorship', desc: 'Structural path to technical mastery.' },
+                                { icon: <GraduationCap size={20} />, title: 'Structural Mentorship', desc: 'Structural path to technical mastery.' },
                                 { icon: <Users size={20} />, title: 'Career Strategy', desc: 'Elite placement and referral sync.' },
                             ].map((s, i) => (
                                 <div 

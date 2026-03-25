@@ -98,12 +98,14 @@ const AdminDashboard = () => {
     }, [searchParams])
     const fetchOrders = async () => {
         try {
+            console.log('Fetching orders from:', `${API_BASE_URL}/admin/orders`)
             const { data } = await axios.get(`${API_BASE_URL}/admin/orders`, {
                 headers: getAuthHeader()
             })
+            console.log('Orders fetched successfully:', data.length, 'records')
             setOrders(data)
         } catch (err: any) {
-            console.error('Fetch failed:', err)
+            console.error('Fetch failed for /admin/orders:', err)
             if (err.response?.status === 401 || err.response?.status === 403) {
                 localStorage.removeItem('admin_token')
                 window.location.href = `${API_BASE_URL}/auth/google`
@@ -307,7 +309,14 @@ const AdminDashboard = () => {
                             {loading ? (
                                 <tr><td colSpan={6} className="py-24 text-center text-muted-foreground font-semibold italic text-sm">Synchronizing ecosystem data...</td></tr>
                             ) : filtered.length === 0 ? (
-                                <tr><td colSpan={6} className="py-24 text-center text-muted-foreground font-semibold italic text-sm">No neural records identified.</td></tr>
+                                <tr>
+                                    <td colSpan={6} className="py-24 text-center space-y-4">
+                                        <div className="text-muted-foreground font-semibold italic text-sm">No neural records identified.</div>
+                                        <div className="text-[10px] text-muted-foreground uppercase tracking-widest opacity-50">
+                                            Checking API: {API_BASE_URL}
+                                        </div>
+                                    </td>
+                                </tr>
                             ) : filtered.map((o: any) => (
                                 <tr key={o.id} className="hover:bg-muted/20 transition-all group">
                                     <td className="px-8 py-5">
