@@ -7,20 +7,44 @@ import { jwt, sign, verify } from 'hono/jwt'
 import { setCookie, getCookie, deleteCookie } from 'hono/cookie'
 import 'dotenv/config'
 
-const prisma = new PrismaClient()
-const app = new Hono()
+type Bindings = {
+    DATABASE_URL: string
+    RAZORPAY_KEY_ID: string
+    RAZORPAY_KEY_SECRET: string
+    GOOGLE_CLIENT_ID: string
+    GOOGLE_CLIENT_SECRET: string
+    JWT_SECRET: string
+    ADMIN_EMAIL: string
+    FRONTEND_URL: string
+    BACKEND_URL: string
+}
+
+const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('*', cors())
 
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || '',
-    key_secret: process.env.RAZORPAY_KEY_SECRET || '',
-})
+// Helper to get Prisma Client (ensures it's initialized with the current env)
+const getPrisma = (c: any) => {
+    return new PrismaClient({
+        datasources: {
+            db: { url: c.env.DATABASE_URL }
+        }
+    })
+}
+
+// Helper to get Razorpay Client
+const getRazorpay = (c: any) => {
+    return new Razorpay({
+        key_id: c.env.RAZORPAY_KEY_ID,
+        key_secret: c.env.RAZORPAY_KEY_SECRET,
+    })
+}
 
 app.get('/', (c) => c.text('BRODX API is running'))
 
 // GET all services with pricing
 app.get('/api/services', async (c) => {
+    const prisma = getPrisma(c)
     try {
         const services = await prisma.service.findMany({
             include: { pricing: true }
@@ -33,6 +57,8 @@ app.get('/api/services', async (c) => {
 
 // POST create order
 app.post('/api/orders', async (c) => {
+    const prisma = getPrisma(c)
+    const razorpay = getRazorpay(c)
     try {
         const { clientName, email, phone, serviceId, tierId, amount, requirements } = await c.req.json()
 
@@ -43,8 +69,7 @@ app.post('/api/orders', async (c) => {
             receipt: `receipt_${Date.now()}`,
         })
 
-        // 2. Validate serviceId/tierId – they may be slug-style (e.g. 'web2-dev') from
-        //    the frontend's local services array. Only persist them if they exist in DB.
+        // 2. Validate serviceId/tierId
         let validServiceId: string | undefined = undefined
         let validTierId: string | undefined = undefined
 
@@ -74,7 +99,7 @@ app.post('/api/orders', async (c) => {
 
         return c.json({
             orderId: razorpayOrder.id,
-            keyId: process.env.RAZORPAY_KEY_ID,
+            keyId: c.env.RAZORPAY_KEY_ID,
             dbOrderId: order.id
         })
     } catch (error) {
@@ -85,10 +110,11 @@ app.post('/api/orders', async (c) => {
 
 // POST verify payment
 app.post('/api/verify', async (c) => {
+    const prisma = getPrisma(c)
     try {
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = await c.req.json()
 
-        const hmac = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET || '')
+        const hmac = crypto.createHmac('sha256', c.env.RAZORPAY_KEY_SECRET || '')
         hmac.update(razorpay_order_id + '|' + razorpay_payment_id)
         const generatedSignature = hmac.digest('hex')
 
@@ -114,8 +140,9 @@ app.post('/api/verify', async (c) => {
     }
 })
 
-// GET single order by DB id (for success page)
+// GET single order by DB id
 app.get('/api/orders/:id', async (c) => {
+    const prisma = getPrisma(c)
     try {
         const id = c.req.param('id')
         const order = await prisma.order.findUnique({
@@ -131,21 +158,14 @@ app.get('/api/orders/:id', async (c) => {
 
 // ─── AUTHENTICATION ─────────────────────────────────────────────────────────
 
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret'
-const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || 'mneeraj2133@gmail.com').trim()
-
 // Google OAuth Configuration
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3000'
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173'
-const REDIRECT_URI = `${BACKEND_URL}/api/auth/callback/google`
+const getRedirectUri = (c: any) => `${c.env.BACKEND_URL || 'http://localhost:3000'}/api/auth/callback/google`
 
 // 1. Redirect to Google Login
 app.get('/api/auth/google', (c) => {
     const params = new URLSearchParams({
-        client_id: GOOGLE_CLIENT_ID || '',
-        redirect_uri: REDIRECT_URI,
+        client_id: c.env.GOOGLE_CLIENT_ID || '',
+        redirect_uri: getRedirectUri(c),
         response_type: 'code',
         scope: 'openid email profile',
         access_type: 'offline',
@@ -166,9 +186,9 @@ app.get('/api/auth/callback/google', async (c) => {
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
                 code,
-                client_id: GOOGLE_CLIENT_ID || '',
-                client_secret: GOOGLE_CLIENT_SECRET || '',
-                redirect_uri: REDIRECT_URI,
+                client_id: c.env.GOOGLE_CLIENT_ID || '',
+                client_secret: c.env.GOOGLE_CLIENT_SECRET || '',
+                redirect_uri: getRedirectUri(c),
                 grant_type: 'authorization_code',
             }),
         })
@@ -184,7 +204,7 @@ app.get('/api/auth/callback/google', async (c) => {
         const user = await userResponse.json() as any
 
         // Verify if it's the admin email
-        if (user.email !== ADMIN_EMAIL) {
+        if (user.email !== (c.env.ADMIN_EMAIL || 'mneeraj2133@gmail.com').trim()) {
             return c.text('Unauthorized: This account does not have admin access.', 403)
         }
 
@@ -193,10 +213,10 @@ app.get('/api/auth/callback/google', async (c) => {
             email: user.email,
             exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24, // 24 hours
         }
-        const token = await sign(payload, JWT_SECRET, 'HS256')
+        const token = await sign(payload, c.env.JWT_SECRET, 'HS256')
 
         // Redirect to frontend with token
-        return c.redirect(`${FRONTEND_URL}/neeraj-vault?token=${token}`)
+        return c.redirect(`${c.env.FRONTEND_URL || 'http://localhost:5173'}/neeraj-vault?token=${token}`)
     } catch (error) {
         console.error('Auth Error:', error)
         return c.json({ error: 'Authentication failed' }, 500)
@@ -211,8 +231,8 @@ const adminAuthMiddleware = async (c: any, next: any) => {
     if (!token) return c.json({ error: 'Unauthorized' }, 401)
 
     try {
-        const decoded = await verify(token, JWT_SECRET, 'HS256') as any
-        if (decoded.email !== ADMIN_EMAIL) return c.json({ error: 'Forbidden' }, 403)
+        const decoded = await verify(token, c.env.JWT_SECRET, 'HS256') as any
+        if (decoded.email !== (c.env.ADMIN_EMAIL || 'mneeraj2133@gmail.com').trim()) return c.json({ error: 'Forbidden' }, 403)
         await next()
     } catch (err) {
         return c.json({ error: 'Invalid or expired token' }, 401)
@@ -221,6 +241,7 @@ const adminAuthMiddleware = async (c: any, next: any) => {
 
 // GET admin orders
 app.get('/api/admin/orders', adminAuthMiddleware, async (c) => {
+    const prisma = getPrisma(c)
     const orders = await prisma.order.findMany({
         orderBy: { createdAt: 'desc' },
         include: { service: true, tier: true }
@@ -230,7 +251,8 @@ app.get('/api/admin/orders', adminAuthMiddleware, async (c) => {
 
 // POST sync order status (Admin)
 app.post('/api/admin/orders/:id/sync', adminAuthMiddleware, async (c) => {
-
+    const prisma = getPrisma(c)
+    const razorpay = getRazorpay(c)
     try {
         const id = c.req.param('id')
         const order = await prisma.order.findUnique({ where: { id } })
@@ -254,12 +276,12 @@ app.post('/api/admin/orders/:id/sync', adminAuthMiddleware, async (c) => {
 
 // POST create manual payment link (Admin)
 app.post('/api/admin/payment-links', adminAuthMiddleware, async (c) => {
-
+    const prisma = getPrisma(c)
+    const razorpay = getRazorpay(c)
     try {
         const { clientName, email, amount, notes, serviceId } = await c.req.json()
 
         // 1. Create Razorpay Payment Link
-        // https://razorpay.com/docs/api/payment-links/create/
         const paymentLink = await razorpay.paymentLink.create({
             amount: Math.round(amount * 100),
             currency: 'INR',
@@ -277,7 +299,7 @@ app.post('/api/admin/payment-links', adminAuthMiddleware, async (c) => {
             notes: {
                 admin_note: notes
             },
-            callback_url: `${process.env.FRONTEND_URL || 'http://localhost:5174'}/admin-page`,
+            callback_url: `${c.env.FRONTEND_URL || 'http://localhost:5173'}/neeraj-vault`,
             callback_method: 'get',
         })
 
@@ -306,7 +328,6 @@ app.post('/api/admin/payment-links', adminAuthMiddleware, async (c) => {
     }
 })
 
-import { serve } from '@hono/node-server'
 import { swaggerUI } from '@hono/swagger-ui'
 
 // ─── Swagger / OpenAPI docs at GET /docs ──────────────────────────────────────
@@ -385,11 +406,5 @@ const openApiSpec = {
 
 app.get('/docs/spec', (c) => c.json(openApiSpec))
 app.get('/docs', swaggerUI({ url: '/docs/spec' }))
-
-const port = 3000
-console.log(`Server is running on port ${port}`)
-console.log(`Swagger docs available at http://localhost:${port}/docs`)
-
-serve({ fetch: app.fetch, port })
 
 export default app
