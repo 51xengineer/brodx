@@ -72,11 +72,29 @@ const AdminDashboard = () => {
     useEffect(() => {
         const paymentId = searchParams.get('razorpay_payment_id')
         const status = searchParams.get('razorpay_payment_link_status')
-        if (paymentId && status === 'paid') {
-            fetchOrders()
-            // Clear params after handling
-            setSearchParams({}, { replace: true })
+        const plId = searchParams.get('razorpay_payment_link_id')
+        
+        const autoSync = async () => {
+            if (plId && status === 'paid') {
+                try {
+                    await axios.get(`${API_BASE_URL}/public/payment-links/sync`, {
+                        params: { razorpay_payment_link_id: plId }
+                    })
+                    fetchOrders()
+                } catch (err) {
+                    console.error('Auto-sync failed:', err)
+                } finally {
+                    // Clear params after handling
+                    setSearchParams({}, { replace: true })
+                }
+            } else if (paymentId && status === 'paid') {
+                // Fallback for standard orders if any
+                fetchOrders()
+                setSearchParams({}, { replace: true })
+            }
         }
+
+        autoSync()
     }, [searchParams])
     const fetchOrders = async () => {
         try {

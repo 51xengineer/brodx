@@ -247,7 +247,7 @@ app.get('/api/admin/orders', adminAuthMiddleware, async (c) => {
     return c.json(orders)
 })
 
-// POST sync order status (Admin)
+// POST sync order status (Admin - Manual Sync)
 app.post('/api/admin/orders/:id/sync', adminAuthMiddleware, async (c) => {
     const prisma = getPrisma(c)
     const razorpay = getRazorpay(c)
@@ -269,6 +269,34 @@ app.post('/api/admin/orders/:id/sync', adminAuthMiddleware, async (c) => {
         return c.json({ status: newStatus })
     } catch (error) {
         return c.json({ error: 'Sync failed' }, 500)
+    }
+})
+
+// GET public sync for payment links (Automated)
+app.get('/api/public/payment-links/sync', async (c) => {
+    const prisma = getPrisma(c)
+    const razorpay = getRazorpay(c)
+    try {
+        const plId = c.req.query('razorpay_payment_link_id')
+        if (!plId) return c.json({ error: 'Missing payment link id' }, 400)
+
+        const order = await prisma.order.findUnique({ where: { paymentLinkId: plId } })
+        if (!order) return c.json({ error: 'Order not found' }, 404)
+
+        // Fetch latest status from Razorpay
+        const pl = await razorpay.paymentLink.fetch(plId)
+        const newStatus = pl.status === 'paid' ? 'paid' : (pl.status === 'expired' ? 'failed' : 'created')
+
+        if (newStatus !== order.status) {
+            await prisma.order.update({
+                where: { id: order.id },
+                data: { status: newStatus }
+            })
+        }
+
+        return c.json({ status: newStatus })
+    } catch (error) {
+        return c.json({ error: 'Public sync failed' }, 500)
     }
 })
 
@@ -297,7 +325,7 @@ app.post('/api/admin/payment-links', adminAuthMiddleware, async (c) => {
             notes: {
                 admin_note: notes
             },
-            callback_url: `${c.env.FRONTEND_URL || 'http://localhost:5173'}/neeraj-vault`,
+            callback_url: `${c.env.BACKEND_URL || 'http://localhost:3000'}/api/public/payment-links/sync-redirect`,
             callback_method: 'get',
         })
 
@@ -324,6 +352,29 @@ app.post('/api/admin/payment-links', adminAuthMiddleware, async (c) => {
         console.error('Razorpay Error:', error)
         return c.json({ error: 'Failed to create payment link' }, 500)
     }
+})
+
+// Landing path for Razorpay redirect to handle automated sync then redirect to dashboard
+app.get('/api/public/payment-links/sync-redirect', async (c) => {
+    const prisma = getPrisma(c)
+    const razorpay = getRazorpay(c)
+    try {
+        const plId = c.req.query('razorpay_payment_link_id')
+        const status = c.req.query('razorpay_payment_link_status')
+
+        if (plId && status === 'paid') {
+            const order = await prisma.order.findUnique({ where: { paymentLinkId: plId } })
+            if (order && order.status !== 'paid') {
+                await prisma.order.update({
+                    where: { id: order.id },
+                    data: { status: 'paid' }
+                })
+            }
+        }
+    } catch (error) {
+        console.error('Redirect sync failed:', error)
+    }
+    return c.redirect(`${c.env.FRONTEND_URL || 'http://localhost:5173'}/neeraj-vault`)
 })
 
 import { swaggerUI } from '@hono/swagger-ui'
