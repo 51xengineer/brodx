@@ -83,6 +83,8 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ service: propService, onB
         }
     }, [service, selectedTier])
 
+    const assets = service ? (ASSET_MAP[service.title] || DEFAULT_ASSET) : DEFAULT_ASSET
+
     const handleBooking = async (e: React.FormEvent) => {
         e.preventDefault()
         setLoading(true)
@@ -151,13 +153,11 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ service: propService, onB
                     {/* Main Info */}
                     {/* Main Info */}
                     <div className="space-y-8">
-                        {(() => {
-                            const assets = ASSET_MAP[service.title] || DEFAULT_ASSET
-                            return (
-                                <>
                                     <div className="flex items-center gap-4">
                                         <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/20">
-                                            {React.cloneElement(assets.icon as React.ReactElement<any>, { size: 32, strokeWidth: 2.5 })}
+                                            {React.isValidElement(assets.icon)
+                                                ? React.cloneElement(assets.icon as React.ReactElement<any>, { size: 32, strokeWidth: 2.5 })
+                                                : null}
                                         </div>
                                         <Badge className="text-[10px] uppercase tracking-[0.2em] bg-primary/5 text-primary border-primary/20 px-3 py-1 font-black">
                                             {assets.category}
@@ -166,9 +166,6 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ service: propService, onB
                                     <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-tight italic">
                                         {service.title}
                                     </h1>
-                                </>
-                            )
-                        })()}
                         <p className="text-xl md:text-2xl text-muted-foreground font-semibold italic leading-relaxed max-w-3xl opacity-90">
                             {service.description}
                         </p>
@@ -266,7 +263,9 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ service: propService, onB
                                                 <div className="md:w-72 bg-muted/30 border-r border-border p-10 space-y-10 hidden md:block">
                                                     <div className="space-y-5">
                                                         <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                                                            {React.cloneElement(service.icon as React.ReactElement<any>, { size: 28 })}
+                                                            {React.isValidElement(assets.icon)
+                                                                ? React.cloneElement(assets.icon as React.ReactElement<any>, { size: 28 })
+                                                                : null}
                                                         </div>
                                                         <div>
                                                             <h3 className="font-black tracking-tight">{service.title}</h3>
