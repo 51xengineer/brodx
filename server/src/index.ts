@@ -6,6 +6,8 @@ import crypto from 'node:crypto'
 import { jwt, sign, verify } from 'hono/jwt'
 import { setCookie, getCookie, deleteCookie } from 'hono/cookie'
 
+import { Pool } from '@neondatabase/serverless'
+import { PrismaNeon } from '@prisma/adapter-neon'
 
 type Bindings = {
     DATABASE_URL: string
@@ -25,11 +27,9 @@ app.use('*', cors())
 
 // Helper to get Prisma Client (ensures it's initialized with the current env)
 const getPrisma = (c: any) => {
-    return new PrismaClient({
-        datasources: {
-            db: { url: c.env.DATABASE_URL }
-        }
-    })
+    const pool = new Pool({ connectionString: c.env.DATABASE_URL })
+    const adapter = new PrismaNeon(pool)
+    return new PrismaClient({ adapter })
 }
 
 // Helper to get Razorpay Client
