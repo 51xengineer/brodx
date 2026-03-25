@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import axios from 'axios'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
-import { SERVICES } from '../constants/services'
+import { SERVICES, ASSET_MAP, DEFAULT_ASSET } from '../constants/services'
 import { API_BASE_URL } from '../config'
 import { GoogleMeetIcon, RazorpayIcon } from '../components/Icons'
 
@@ -112,18 +112,26 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ service: propService, onB
             <div className="grid lg:grid-cols-3 gap-16">
                 <div className="lg:col-span-2 space-y-16">
                     {/* Main Info */}
+                    {/* Main Info */}
                     <div className="space-y-8">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/20">
-                                {React.cloneElement(service.icon as React.ReactElement<any>, { size: 32, strokeWidth: 2.5 })}
-                            </div>
-                            <Badge className="text-[10px] uppercase tracking-[0.2em] bg-primary/5 text-primary border-primary/20 px-3 py-1 font-black">
-                                {service.category}
-                            </Badge>
-                        </div>
-                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-tight italic">
-                            {service.title}
-                        </h1>
+                        {(() => {
+                            const assets = ASSET_MAP[service.title] || DEFAULT_ASSET
+                            return (
+                                <>
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-sm border border-primary/20">
+                                            {React.cloneElement(assets.icon as React.ReactElement<any>, { size: 32, strokeWidth: 2.5 })}
+                                        </div>
+                                        <Badge className="text-[10px] uppercase tracking-[0.2em] bg-primary/5 text-primary border-primary/20 px-3 py-1 font-black">
+                                            {assets.category}
+                                        </Badge>
+                                    </div>
+                                    <h1 className="text-5xl md:text-7xl font-black tracking-tighter leading-tight italic">
+                                        {service.title}
+                                    </h1>
+                                </>
+                            )
+                        })()}
                         <p className="text-xl md:text-2xl text-muted-foreground font-semibold italic leading-relaxed max-w-3xl opacity-90">
                             {service.description}
                         </p>

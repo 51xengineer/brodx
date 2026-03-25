@@ -21,6 +21,38 @@ export interface Service {
     pricing?: PricingTier[]
 }
 
+export const ASSET_MAP: Record<string, { icon: React.ReactNode, image: string, badge?: string, category: string }> = {
+    'Elite Web Synthesis': {
+        icon: <Rocket />,
+        image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800',
+        badge: 'POPULAR',
+        category: 'ENGINEERING'
+    },
+    'Neural Architecture': {
+        icon: <Brain />,
+        image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=800',
+        category: 'INTELLIGENCE'
+    },
+    '1:1 Mentorship': {
+        icon: <GraduationCap />,
+        image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&q=80&w=800',
+        badge: 'HIGH VALUE',
+        category: 'GROWTH'
+    },
+    'Placement Strategy': {
+        icon: <Users />,
+        image: 'https://images.unsplash.com/photo-1521791136064-7986c2959d43?auto=format&fit=crop&q=80&w=800',
+        badge: 'STRATEGY',
+        category: 'STRATEGY'
+    }
+}
+
+export const DEFAULT_ASSET = {
+    icon: <Rocket />,
+    image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=800',
+    category: 'SERVICE'
+}
+
 export const SERVICES: Service[] = [
     {
         id: 'web-dev',

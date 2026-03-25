@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import process from 'node:process'
 const prisma = new PrismaClient()
 
 async function main() {
@@ -7,16 +8,16 @@ async function main() {
     await prisma.pricingTier.deleteMany()
     await prisma.service.deleteMany()
 
-    const web2 = await prisma.service.create({
+    const web = await prisma.service.create({
         data: {
-            title: 'Web Development (Web2)',
-            description: 'High-performance, modern web applications built with React, Node.js, and the latest tech stack.',
+            title: 'Elite Web Synthesis',
+            description: 'Blazing fast, high-performance web applications built for extreme scale and surgical precision.',
             icon: 'Rocket',
             pricing: {
                 create: [
-                    { name: 'Basic', price: 499, features: ['Core Deliverables', 'Email Support', '1 Revision'] },
-                    { name: 'Standard', price: 899, features: ['Enhanced Deliverables', 'Priority Support', '3 Revisions'] },
-                    { name: 'Premium', price: 1749, features: ['Full Suite Solutions', '24/7 Support', 'Unlimited Revisions'] },
+                    { name: 'Basic', price: 99, features: ['Core Deliverables', 'Email Support'] },
+                    { name: 'Standard', price: 199, features: ['Enhanced Deliverables', 'Priority Support'] },
+                    { name: 'Premium', price: 499, features: ['Full Suite Solutions', '24/7 Support'] },
                 ]
             }
         }
@@ -24,14 +25,14 @@ async function main() {
 
     const ai = await prisma.service.create({
         data: {
-            title: 'AI Solutions',
-            description: 'Integrate cutting-edge AI features into your existing platforms or build AI-first products from scratch.',
-            icon: 'Cpu',
+            title: 'Neural Architecture',
+            description: 'Integrating advanced LLMs and specialized ML models into your ecosystem.',
+            icon: 'Brain',
             pricing: {
                 create: [
-                    { name: 'Basic', price: 799, features: ['LLM Integration', 'Custom RAG'] },
-                    { name: 'Standard', price: 1449, features: ['Workflow Automation', 'ML Model Hosting'] },
-                    { name: 'Premium', price: 2799, features: ['Full Suite AI Solutions', 'Scale Consultancy'] },
+                    { name: 'Basic', price: 149, features: ['Core Deliverables', 'Email Support'] },
+                    { name: 'Standard', price: 299, features: ['Enhanced Deliverables', 'Priority Support'] },
+                    { name: 'Premium', price: 599, features: ['Full Suite Solutions', '24/7 Support'] },
                 ]
             }
         }
@@ -39,14 +40,42 @@ async function main() {
 
     const mentorship = await prisma.service.create({
         data: {
-            title: '1:1 Mentorship',
-            description: 'Fast-track your career with personalized guidance on DSA, System Design, and CS Fundamentals.',
+            title: 'Structural Mentorship',
+            description: 'Deep-dive session to re-architect your engineering path.',
             icon: 'GraduationCap',
             pricing: {
                 create: [
-                    { name: 'Basic', price: 99, features: ['DSA Masterclass', 'Interview Prep'] },
-                    { name: 'Standard', price: 179, features: ['System Design', 'Resume Review'] },
-                    { name: 'Premium', price: 349, features: ['Full Career Strategy', 'Direct Referral Support'] },
+                    { name: 'Basic', price: 49, features: ['Core Deliverables', 'Email Support'] },
+                    { name: 'Standard', price: 99, features: ['Enhanced Deliverables', 'Priority Support'] },
+                    { name: 'Premium', price: 199, features: ['Full Suite Solutions', '24/7 Support'] },
+                ]
+            }
+        }
+    })
+
+    const career = await prisma.service.create({
+        data: {
+            title: 'Placement Strategy',
+            description: 'Personal consultancy to navigate the global tech market.',
+            icon: 'Users',
+            pricing: {
+                create: [
+                    { name: 'Basic', price: 29, features: ['Core Deliverables', 'Email Support'] },
+                    { name: 'Standard', price: 59, features: ['Enhanced Deliverables', 'Priority Support'] },
+                    { name: 'Premium', price: 129, features: ['Full Suite Solutions', '24/7 Support'] },
+                ]
+            }
+        }
+    })
+
+    const debug = await prisma.service.create({
+        data: {
+            title: 'Payment Integration Test',
+            description: 'A special service for testing end-to-end payment flows with a minimum cost of ₹1.',
+            icon: 'Activity',
+            pricing: {
+                create: [
+                    { name: 'Test Tier', price: 1, features: ['Minimum Payment', 'Secure Transaction', 'Instant Verification'] },
                 ]
             }
         }
