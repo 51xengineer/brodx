@@ -1,7 +1,7 @@
 name = "brodx-backend"
 main = "src/index.ts"
 compatibility_date = "2024-03-25"
-node_compat = true
+compatibility_flags = [ "nodejs_compat" ]
 
 [vars]
 FRONTEND_URL = "https://brodx.com"
