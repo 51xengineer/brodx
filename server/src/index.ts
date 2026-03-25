@@ -6,7 +6,6 @@ import crypto from 'node:crypto'
 import { jwt, sign, verify } from 'hono/jwt'
 import { setCookie, getCookie, deleteCookie } from 'hono/cookie'
 
-import { Pool } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
 
 type Bindings = {
@@ -27,8 +26,7 @@ app.use('*', cors())
 
 // Helper to get Prisma Client (ensures it's initialized with the current env)
 const getPrisma = (c: any) => {
-    const pool = new Pool({ connectionString: c.env.DATABASE_URL })
-    const adapter = new PrismaNeon(pool)
+    const adapter = new PrismaNeon({ connectionString: c.env.DATABASE_URL })
     return new PrismaClient({ adapter })
 }
 
