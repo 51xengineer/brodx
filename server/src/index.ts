@@ -5,7 +5,7 @@ import Razorpay from 'razorpay'
 import crypto from 'node:crypto'
 import { jwt, sign, verify } from 'hono/jwt'
 import { setCookie, getCookie, deleteCookie } from 'hono/cookie'
-import 'dotenv/config'
+
 
 type Bindings = {
     DATABASE_URL: string
